@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import logo from './logo.svg'
 import './App.css'
 import useForm from './useForm'
@@ -50,7 +50,7 @@ const initialValues = {
 const validation = {
   name: {
     required: true,
-    validate: (value) => value === 'Rafa',
+    validate: (value) => value,
     message: 'Invalid name',
   },
   email: {
@@ -61,22 +61,25 @@ const validation = {
   url: {
     required: false,
     validate: (value) => value,
-    message: 'Invalid url',
   },
   phone: {
     required: false,
-    validate: (value) => value,
     message: 'Invalid phone',
   },
 }
 
 function App() {
-  const { values, handleChange, handleSubmit, errors } = useForm({
+  const ref = useRef(null)
+  const onSubmit = (values) => {
+    alert(JSON.stringify(values))
+  }
+  const { values, handleChange, handleSubmit, errors, isValid } = useForm({
     initialValues,
+    onSubmit,
     validation,
   })
   const { name, email, url, phone } = values
-
+  console.log(ref?.current?.touched)
   return (
     <div className="App">
       <header className="App-header">
@@ -86,6 +89,7 @@ function App() {
       <main style={styles.main}>
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
+            ref={ref}
             name="name"
             value={name}
             onChange={handleChange}
@@ -117,7 +121,7 @@ function App() {
             style={styles.input}
           />
           <span style={styles.error}>{errors?.phone}</span>
-          <button type="submit" style={styles.button}>
+          <button type="submit" style={styles.button} disabled={!isValid}>
             Submit
           </button>
         </form>

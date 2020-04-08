@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 
 const reducer = (state, { payload: { field, value, error }, type }) => {
   switch (type) {
@@ -12,31 +12,49 @@ const reducer = (state, { payload: { field, value, error }, type }) => {
         ...state,
         errors: { ...state.errors, [field]: error },
       }
+    case 'TOUCH_FIELD':
+      return {
+        ...state,
+        touched: { ...state.touched, [field]: true },
+      }
     default:
       return state
   }
 }
 
-const useForm = ({ initialValues, validation }) => {
+const useForm = ({ initialValues, validation, onSubmit = () => {} }) => {
+  const [isValid, setIsValid] = useState(false)
   const [state, dispatch] = useReducer(reducer, {
     values: initialValues,
     errors: {},
+    touched: {},
   })
 
   const { values, errors } = state
 
   useEffect(() => {
-    const validateField = (field) => validation[field]?.validate(values[field])
+    const validateField = (field) =>
+      validation[field]?.required
+        ? !!values[field]
+        : validation[field]?.validate
+        ? validation[field]?.validate(values[field])
+        : true
     Object.keys(values).forEach((name) => {
       dispatch({
         type: 'VALIDATE_FIELD',
         payload: {
           field: name,
-          error: !validateField(name) && validation[name]?.message,
+          error:
+            !validateField(name) &&
+            (validation[name].message || `Invalid ${name}`),
         },
       })
     })
   }, [values, validation])
+
+  useEffect(() => {
+    setIsValid(!Object.keys(errors).find((field) => errors[field]))
+  }, [errors])
 
   const handleChange = (event) => {
     event.preventDefault()
@@ -51,7 +69,7 @@ const useForm = ({ initialValues, validation }) => {
   }
   const handleSubmit = (event) => {
     event.preventDefault()
-    alert(JSON.stringify(state.values))
+    return onSubmit(values)
   }
 
   return {
@@ -59,6 +77,7 @@ const useForm = ({ initialValues, validation }) => {
     handleChange,
     handleSubmit,
     errors,
+    isValid,
   }
 }
 
