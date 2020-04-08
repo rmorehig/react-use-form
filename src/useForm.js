@@ -22,7 +22,11 @@ const reducer = (state, { payload: { field, value, error }, type }) => {
   }
 }
 
-const useForm = ({ initialValues, validation, onSubmit = () => {} }) => {
+const useForm = ({
+  initialValues = {},
+  validation = {},
+  onSubmit = () => {},
+}) => {
   const [isValid, setIsValid] = useState(false)
   const [state, dispatch] = useReducer(reducer, {
     values: initialValues,
