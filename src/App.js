@@ -26,7 +26,7 @@ const styles = {
   button: {
     borderWidth: 0,
     borderRadius: 3,
-    backgroundColor: 'green',
+    backgroundColor: '#31C48D',
     color: 'white',
     cursor: 'pointer',
     fontFamily: 'inherit',
@@ -34,6 +34,9 @@ const styles = {
     margin: '1rem 0 1rem',
     padding: '0.5rem 1rem',
     width: '100%',
+  },
+  error: {
+    color: '#F98080',
   },
 }
 
@@ -44,9 +47,33 @@ const initialValues = {
   phone: '',
 }
 
+const validation = {
+  name: {
+    required: true,
+    validate: (value) => value === 'Rafa',
+    message: 'Invalid name',
+  },
+  email: {
+    required: false,
+    validate: (value) => value,
+    message: 'Invalid email',
+  },
+  url: {
+    required: false,
+    validate: (value) => value,
+    message: 'Invalid url',
+  },
+  phone: {
+    required: false,
+    validate: (value) => value,
+    message: 'Invalid phone',
+  },
+}
+
 function App() {
   const { values, handleChange, handleSubmit, errors } = useForm({
     initialValues,
+    validation,
   })
   const { name, email, url, phone } = values
 
@@ -65,7 +92,7 @@ function App() {
             placeholder="Enter your name"
             style={styles.input}
           />
-          {errors?.name}
+          <span style={styles.error}>{errors?.name}</span>
           <input
             name="email"
             value={email}
@@ -73,7 +100,7 @@ function App() {
             placeholder="Enter your email"
             style={styles.input}
           />
-          {errors?.email}
+          <span style={styles.error}>{errors?.email}</span>
           <input
             name="url"
             value={url}
@@ -81,7 +108,7 @@ function App() {
             placeholder="Enter your URL"
             style={styles.input}
           />
-          {errors?.url}
+          <span style={styles.error}>{errors?.url}</span>
           <input
             name="phone"
             placeholder="Enter your phone"
@@ -89,7 +116,7 @@ function App() {
             onChange={handleChange}
             style={styles.input}
           />
-          {errors?.phone}
+          <span style={styles.error}>{errors?.phone}</span>
           <button type="submit" style={styles.button}>
             Submit
           </button>

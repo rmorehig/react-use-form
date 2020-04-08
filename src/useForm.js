@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 
 const reducer = (state, { payload: { field, value, error }, type }) => {
   switch (type) {
@@ -6,6 +6,10 @@ const reducer = (state, { payload: { field, value, error }, type }) => {
       return {
         ...state,
         values: { ...state.values, [field]: value },
+      }
+    case 'VALIDATE_FIELD':
+      return {
+        ...state,
         errors: { ...state.errors, [field]: error },
       }
     default:
@@ -19,16 +23,29 @@ const useForm = ({ initialValues, validation }) => {
     errors: {},
   })
 
-  const validateField = (value) => {}
+  const { values, errors } = state
+
+  useEffect(() => {
+    const validateField = (field) => validation[field]?.validate(values[field])
+    Object.keys(values).forEach((name) => {
+      dispatch({
+        type: 'VALIDATE_FIELD',
+        payload: {
+          field: name,
+          error: !validateField(name) && validation[name]?.message,
+        },
+      })
+    })
+  }, [values, validation])
 
   const handleChange = (event) => {
     event.preventDefault()
+    const { name, value } = event.target
     dispatch({
       type: 'UPDATE_FIELD',
       payload: {
-        field: event.target.name,
-        value: event.target.value,
-        error: validateField(event.target.value),
+        field: name,
+        value: value,
       },
     })
   }
@@ -38,10 +55,10 @@ const useForm = ({ initialValues, validation }) => {
   }
 
   return {
-    values: state.values,
+    values,
     handleChange,
     handleSubmit,
-    errors: state.errors,
+    errors,
   }
 }
 
