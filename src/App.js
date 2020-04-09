@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useEffect } from 'react'
 import logo from './logo.svg'
 import './App.css'
 import useForm from './useForm'
@@ -63,23 +63,24 @@ const validation = {
     validate: (value) => value,
   },
   phone: {
-    required: false,
+    required: true,
     message: 'Invalid phone',
   },
 }
 
 function App() {
-  const ref = useRef(null)
   const onSubmit = (values) => {
     alert(JSON.stringify(values))
   }
-  const { values, handleChange, handleSubmit, errors, isValid } = useForm({
-    initialValues,
-    onSubmit,
-    validation,
-  })
+  const { values, handleChange, handleSubmit, errors, isValid, refs } = useForm(
+    {
+      initialValues,
+      onSubmit,
+      validation,
+    }
+  )
   const { name, email, url, phone } = values
-  console.log(ref?.current?.touched)
+
   return (
     <div className="App">
       <header className="App-header">
@@ -89,7 +90,7 @@ function App() {
       <main style={styles.main}>
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
-            ref={ref}
+            ref={refs}
             name="name"
             value={name}
             onChange={handleChange}
@@ -98,6 +99,7 @@ function App() {
           />
           <span style={styles.error}>{errors?.name}</span>
           <input
+            ref={refs}
             name="email"
             value={email}
             onChange={handleChange}

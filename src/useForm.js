@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react'
+import React, { useEffect, useReducer, useState, useRef } from 'react'
 
 const reducer = (state, { payload: { field, value, error }, type }) => {
   switch (type) {
@@ -17,6 +17,11 @@ const reducer = (state, { payload: { field, value, error }, type }) => {
         ...state,
         touched: { ...state.touched, [field]: true },
       }
+    case 'BLUR_FIELD':
+      return {
+        ...state,
+        touched: { ...state.touched, [field]: false },
+      }
     default:
       return state
   }
@@ -33,8 +38,14 @@ const useForm = ({
     errors: {},
     touched: {},
   })
+  let refs = {}
 
-  const { values, errors } = state
+  refs = useRef(
+    Object.keys(initialValues).forEach(
+      (key) => (refs = { ...refs, [key]: React.createRef() })
+    )
+  )
+  const { values, errors, touched } = state
 
   useEffect(() => {
     const validateField = (field) =>
@@ -76,12 +87,47 @@ const useForm = ({
     return onSubmit(values)
   }
 
+  useEffect(() => {
+    const { current } = refs
+
+    const handleFocus = () => {
+      console.log('input is focussed', current.name)
+      dispatch({
+        type: 'TOUCH_FIELD',
+        payload: {
+          field: current.name,
+        },
+      })
+    }
+    const handleBlur = () => {
+      console.log('input is blurred', current.name)
+      dispatch({
+        type: 'BLUR_FIELD',
+        payload: {
+          field: current.name,
+        },
+      })
+    }
+    if (current) {
+      current.addEventListener('focus', handleFocus)
+      current.addEventListener('blur', handleBlur)
+    }
+    return () => {
+      if (current) {
+        current.removeEventListener('focus', handleFocus)
+        current.removeEventListener('blur', handleBlur)
+      }
+    }
+  }, [refs])
+
   return {
     values,
     handleChange,
     handleSubmit,
     errors,
+    touched,
     isValid,
+    refs,
   }
 }
 
