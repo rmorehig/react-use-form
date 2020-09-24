@@ -1,60 +1,37 @@
-import React from 'react'
+import React, { useState } from 'react'
 import logo from './logo.svg'
 import './App.css'
-import useForm from './useForm'
-import styles from './styles'
-import schema from './schema'
+import useForm from './hooks/useForm'
+import schema from './config/schema'
+import Field from './components/Field'
+import Form from './components/Form'
+import Submit from './components/Submit'
 
 function App() {
-  const onSubmit = values => {
-    alert(JSON.stringify(values))
+  const [result, setResult] = useState('')
+  const onSubmit = isValid => {
+    setResult(isValid ? 'Your data is valid' : 'Your data is not valid')
   }
   const { handleChange, handleSubmit } = useForm({
     schema,
-    onSubmit
+    onSubmit,
   })
 
-  console.log('rendered')
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>React useForm</p>
       </header>
-      <main style={styles.main}>
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <input
-            name="name"
-            onChange={handleChange}
-            placeholder="Enter your name"
-            style={styles.input}
-          />
-
-          <input
-            name="email"
-            onChange={handleChange}
-            placeholder="Enter your email"
-            style={styles.input}
-          />
-
-          <input
-            name="url"
-            onChange={handleChange}
-            placeholder="Enter your URL"
-            style={styles.input}
-          />
-
-          <input
-            name="phone"
-            placeholder="Enter your phone"
-            onChange={handleChange}
-            style={styles.input}
-          />
-          <button type="submit" style={styles.button}>
-            Submit
-          </button>
-        </form>
+      <main>
+        <Form onSubmit={handleSubmit}>
+          <Field name="name" onChange={handleChange} />
+          <Field name="email" onChange={handleChange} />
+          <Field name="url" onChange={handleChange} />
+          <Field name="phone" onChange={handleChange} />
+          <Submit />
+        </Form>
       </main>
+      <h2>{result}</h2>
     </div>
   )
 }
